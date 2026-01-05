@@ -165,7 +165,7 @@ Options.SaveNormalPrompt = False		&apos;关闭保存 Normal 模板时的提示�
 此方法对虚机性能影响较大，Desktop版几乎是卡到没法用，各位师傅自行斟酌。
 :::&lt;/p&gt;
 &lt;h2&gt;参考配置&lt;/h2&gt;
-&lt;p&gt;M2 MacBookAir 16G内存1T硬盘&lt;/p&gt;
+&lt;p&gt;M2 MacBookAir 16G内存1T存储&lt;/p&gt;
 &lt;p&gt;macOS Sonoma -- 14.5&lt;/p&gt;
 &lt;p&gt;UTM -- 4.5.3 (99)&lt;/p&gt;
 &lt;p&gt;Image -- Ubuntu Server 22.04 LTS x86_64&lt;/p&gt;

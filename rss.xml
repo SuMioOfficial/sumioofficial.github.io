@@ -1565,6 +1565,7 @@ d26f353d-c564-48e7-b26f-aa48c6eecd58
 &lt;li&gt;Azure AD Authentication for Blob Storage&lt;/li&gt;
 &lt;li&gt;App 配置不可读 ≠ 资源不可用&lt;/li&gt;
 &lt;/ul&gt;
+</content:encoded></item><item><title>PWN Note</title><link>https://25pm-sumio.github.io/posts/2026/01/05/01/</link><guid isPermaLink="true">https://25pm-sumio.github.io/posts/2026/01/05/01/</guid><description>PWN学习笔记，自用</description><pubDate>Mon, 05 Jan 2026 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;PWN Note&lt;/h1&gt;
 </content:encoded></item><item><title>Draft Example</title><link>https://25pm-sumio.github.io/posts/draft/</link><guid isPermaLink="true">https://25pm-sumio.github.io/posts/draft/</guid><pubDate>Fri, 01 Jul 2022 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;This Article is a Draft&lt;/h1&gt;
 &lt;p&gt;This article is currently in a draft state and is not published. Therefore, it will not be visible to the general audience. The content is still a work in progress and may require further editing and review.&lt;/p&gt;
 &lt;p&gt;When the article is ready for publication, you can update the &quot;draft&quot; field to &quot;false&quot; in the Frontmatter:&lt;/p&gt;

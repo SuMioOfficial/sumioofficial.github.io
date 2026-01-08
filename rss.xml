@@ -1566,6 +1566,56 @@ d26f353d-c564-48e7-b26f-aa48c6eecd58
 &lt;li&gt;App 配置不可读 ≠ 资源不可用&lt;/li&gt;
 &lt;/ul&gt;
 </content:encoded></item><item><title>PWN Note</title><link>https://25pm-sumio.github.io/posts/2026/01/05/01/</link><guid isPermaLink="true">https://25pm-sumio.github.io/posts/2026/01/05/01/</guid><description>PWN学习笔记，自用</description><pubDate>Mon, 05 Jan 2026 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;PWN Note&lt;/h1&gt;
+&lt;h2&gt;环境问题&lt;/h2&gt;
+&lt;h3&gt;UTM安装kali 25.04 x86_64&lt;/h3&gt;
+&lt;p&gt;挂载共享目录&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo mount -t 9p -o trans=virtio,version=9p2000.u share /mnt/share
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;安装pwndbg&lt;/h3&gt;
+&lt;p&gt;clone pwndbg 要用x86的机器clone，否则安装过程中uv可能将处理器型号识别成其他型号导致IO报错&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Downloading uv-0.9.21-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (22.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 22.2/22.2 MB 8.7 MB/s  0:00:03
+Installing collected packages: uv
+Successfully installed uv-0.9.21
+Installing dependencies..
+error: Failed to generate package metadata for `gdb-for-pwndbg==16.3.0.post6 @ direct+https://github.com/pwndbg/pypi-for-pwndbg/releases/download/gdb-v16.3.0.post6/gdb_for_pwndbg-16.3.0.post6-cp310-cp310-manylinux_2_36_loongarch64.whl`
+  Caused by: Failed to extract archive: gdb_for_pwndbg-16.3.0.post6-cp310-cp310-manylinux_2_36_loongarch64.whl
+  Caused by: I/O operation failed during extraction
+  Caused by: Failed to download distribution due to network timeout. Try increasing UV_HTTP_TIMEOUT (current value: 30s).
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;Kali25.04与pwndbg冲突&lt;/h3&gt;
+&lt;p&gt;本质是kali2504无法安装python3.13以前的版本，导致3.13与pwndbg兼容不好。安装pyenv切换python版本&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt install pyenv
+proxychains4 pyenv install 3.11
+
+#设置全局版本，重启shell生效
+pyenv global 3.11
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后根据pyenv init进行配置，写入~/.zshrc&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;export PYENV_ROOT=&quot;$HOME/.pyenv&quot;
+[[ -d $PYENV_ROOT/bin ]] &amp;amp;&amp;amp; export PATH=&quot;$PYENV_ROOT/bin:$PATH&quot;
+eval &quot;$(pyenv init - zsh)&quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;gdb配置文件自定义&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;# ~/.gdbinit
+
+source /home/mio/桌面/pwndbg/gdbinit.py
+set disassembly-flavor intel
+set debuginfod enable off
+set confirm off
+set pagination off
+set show-tips off
+set context-output /dev/pts/1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;dbg命令&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;run				运行
+start			gdb找程序入口点
+
+i r				查看寄存器
+i b				查看断点
+
+disass $rip				显示rip所在位置
+&lt;/code&gt;&lt;/pre&gt;
 </content:encoded></item><item><title>Draft Example</title><link>https://25pm-sumio.github.io/posts/draft/</link><guid isPermaLink="true">https://25pm-sumio.github.io/posts/draft/</guid><pubDate>Fri, 01 Jul 2022 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;This Article is a Draft&lt;/h1&gt;
 &lt;p&gt;This article is currently in a draft state and is not published. Therefore, it will not be visible to the general audience. The content is still a work in progress and may require further editing and review.&lt;/p&gt;
 &lt;p&gt;When the article is ready for publication, you can update the &quot;draft&quot; field to &quot;false&quot; in the Frontmatter:&lt;/p&gt;

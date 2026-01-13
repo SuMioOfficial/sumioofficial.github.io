@@ -1596,6 +1596,7 @@ pyenv global 3.11
 [[ -d $PYENV_ROOT/bin ]] &amp;amp;&amp;amp; export PATH=&quot;$PYENV_ROOT/bin:$PATH&quot;
 eval &quot;$(pyenv init - zsh)&quot;
 &lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;gdb&lt;/h2&gt;
 &lt;h3&gt;gdb配置文件自定义&lt;/h3&gt;
 &lt;pre&gt;&lt;code&gt;# ~/.gdbinit
 
@@ -1607,14 +1608,239 @@ set pagination off
 set show-tips off
 set context-output /dev/pts/1
 &lt;/code&gt;&lt;/pre&gt;
-&lt;h2&gt;dbg命令&lt;/h2&gt;
+&lt;h3&gt;gdb命令&lt;/h3&gt;
 &lt;pre&gt;&lt;code&gt;run				运行
 start			gdb找程序入口点
-
+ni				下一步（一行）
+si				步入，进入下一个函数
+finish		步出（函数）
 i r				查看寄存器
-i b				查看断点
+p					打印
+x					从某个值编译x行，例如：x/20b $rbp-0x10，b是以byte(1个字节的形式)形式看$rbp后面20行，也可以用
+					i(已汇编的形式显示)/g(以8个字节的形式)/w(以4个字节的形式)/d(以十进制格式显示)/x(以十进制格式显
+					示)/s(以字符串的形式显示)；
+set				设置(给地址赋值)，例如：set *0x00000000004012b7=0x61，就是把该地址的值变成0x61。set *((unsigned int)$rbp)=0x18；
+
+
+#断点
+i b								查看断点
+disable b 1				使第1个断点失效（常用）
+enable b 1				使第1个断点启用
+d 1								删除第1个断点（非必要不删除）
 
 disass $rip				显示rip所在位置
+
+b *[addres]				设置断点
+c									到下一个断点
+
+
+vmmap							看内存的基本情况
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;gcc&lt;/h2&gt;
+&lt;h3&gt;gcc新版本编译&lt;/h3&gt;
+&lt;p&gt;因新版本默认禁用gets等高危函数，导致直接报error，所以附加参数&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;gcc vuln.c -o vuln \
+  -fno-stack-protector \
+  -no-pie \
+  -z execstack \
+  -Wno-implicit-function-declaration
+&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;参数&lt;/th&gt;
+&lt;th&gt;作用&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;-fno-stack-protector&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;关闭 canary&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;-z execstack&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;栈可执行（后面 shellcode 用）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;-no-pie&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;关闭 PIE（地址固定）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;-Wno-implicit-function-declaration&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;允许 gets&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3&gt;gcc编译命令&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt install gcc-multili=lib g++-multilib module-assistant
+
+gcc -m32 xxx.c -o xxx
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;汇编&lt;/h2&gt;
+&lt;h3&gt;汇编指令&lt;/h3&gt;
+&lt;p&gt;add ---- 加并赋值&lt;/p&gt;
+&lt;p&gt;sub ---- 减并赋值&lt;/p&gt;
+&lt;p&gt;call ---- 调用函数&lt;/p&gt;
+&lt;p&gt;push ---- 把值放到内存里面&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;push   rbp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;mov----把后面的值赋值给前面&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;mov    rbp,rsp			# rbp=rsp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Lea [......] ---- 载入地址，现用于计算，运算后赋值给前面（不改变）&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;lea    rax,[rbp-0x18]
+
+等于
+
+sub    rbp,0x18
+mov    rax,rbp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;xor ---- 异或，多用于归零&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;xor    eax,eax
+
+等于
+
+mov    eax,0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;cmp ---- 约等于sub，区别在是否赋值&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cmp    al,0x61
+
+sub    al,0x61        # al=al-0x61
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;test ----&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;test    ebx,ebx      # cmp   ebx,0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;jne/je  JCC系列----上一句的结果满足xxxx条件跳转&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;JCC指令&lt;/th&gt;
+&lt;th&gt;中文含义&lt;/th&gt;
+&lt;th&gt;英文原意&lt;/th&gt;
+&lt;th&gt;检查符号位&lt;/th&gt;
+&lt;th&gt;典型C应用&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;JZ/JE&lt;/td&gt;
+&lt;td&gt;若为0则跳转；若相等则跳转&lt;/td&gt;
+&lt;td&gt;jump if zero;jump if equal&lt;/td&gt;
+&lt;td&gt;ZF=1&lt;/td&gt;
+&lt;td&gt;if (i == j);if (i == 0);&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JNZ/JNE&lt;/td&gt;
+&lt;td&gt;若不为0则跳转；若不相等则跳转&lt;/td&gt;
+&lt;td&gt;jump if not zero;jump if not equal&lt;/td&gt;
+&lt;td&gt;ZF=0&lt;/td&gt;
+&lt;td&gt;if (i != j);if (i != 0);&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JS&lt;/td&gt;
+&lt;td&gt;若为负则跳转&lt;/td&gt;
+&lt;td&gt;jump if sign&lt;/td&gt;
+&lt;td&gt;SF=1&lt;/td&gt;
+&lt;td&gt;if (i &amp;lt; 0);&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JNS&lt;/td&gt;
+&lt;td&gt;若为正则跳转&lt;/td&gt;
+&lt;td&gt;jump if not sign&lt;/td&gt;
+&lt;td&gt;SF=0&lt;/td&gt;
+&lt;td&gt;if (i &amp;gt; 0);&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JP/JPE&lt;/td&gt;
+&lt;td&gt;若1出现次数为偶数则跳转&lt;/td&gt;
+&lt;td&gt;jump if Parity (Even)&lt;/td&gt;
+&lt;td&gt;PF=1&lt;/td&gt;
+&lt;td&gt;(null)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JNP/JPO&lt;/td&gt;
+&lt;td&gt;若1出现次数为奇数则跳转&lt;/td&gt;
+&lt;td&gt;jump if not parity (odd)&lt;/td&gt;
+&lt;td&gt;PF=0&lt;/td&gt;
+&lt;td&gt;(null)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JO&lt;/td&gt;
+&lt;td&gt;若溢出则跳转&lt;/td&gt;
+&lt;td&gt;jump if overflow&lt;/td&gt;
+&lt;td&gt;OF=1&lt;/td&gt;
+&lt;td&gt;(null)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JNO&lt;/td&gt;
+&lt;td&gt;若无溢出则跳转&lt;/td&gt;
+&lt;td&gt;jump if not overflow&lt;/td&gt;
+&lt;td&gt;OF=0&lt;/td&gt;
+&lt;td&gt;(null)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JC/JB/JNAE&lt;/td&gt;
+&lt;td&gt;若进位则跳转；若低于则跳转；若不高于等于则跳转&lt;/td&gt;
+&lt;td&gt;jump if carry;jump if below;jump if not above equal&lt;/td&gt;
+&lt;td&gt;CF=1&lt;/td&gt;
+&lt;td&gt;if (i &amp;lt; j);&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JNC/JNB/JAE&lt;/td&gt;
+&lt;td&gt;若无进位则跳转；若不低于则跳转；若高于等于则跳转；&lt;/td&gt;
+&lt;td&gt;jump if not carry;jump if not below;jump if above equal&lt;/td&gt;
+&lt;td&gt;CF=0&lt;/td&gt;
+&lt;td&gt;if (i &amp;gt;= j);&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JBE/JNA&lt;/td&gt;
+&lt;td&gt;若低于等于则跳转；若不高于则跳转&lt;/td&gt;
+&lt;td&gt;jump if below equal;jump if not above&lt;/td&gt;
+&lt;td&gt;ZF=1或CF=1&lt;/td&gt;
+&lt;td&gt;if (i &amp;lt;= j);&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JNBE/JA&lt;/td&gt;
+&lt;td&gt;若不低于等于则跳转；若高于则跳转&lt;/td&gt;
+&lt;td&gt;jump if not below equaljump if abow&lt;/td&gt;
+&lt;td&gt;ZF=0或CF=0&lt;/td&gt;
+&lt;td&gt;if (i &amp;gt; j);&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JL/JNGE&lt;/td&gt;
+&lt;td&gt;若小于则跳转；若不大于等于则跳转&lt;/td&gt;
+&lt;td&gt;jump if lessjump if not greater equal&lt;/td&gt;
+&lt;td&gt;SF != OF&lt;/td&gt;
+&lt;td&gt;if (si &amp;lt; sj);&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JNL/JGE&lt;/td&gt;
+&lt;td&gt;若不小于则跳转；若大于等于则跳转；&lt;/td&gt;
+&lt;td&gt;jump if not less;jump if greater equal&lt;/td&gt;
+&lt;td&gt;SF = OF&lt;/td&gt;
+&lt;td&gt;if (si &amp;gt;= sj);&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JLE/JNG&lt;/td&gt;
+&lt;td&gt;若小于等于则跳转；若不大于则跳转&lt;/td&gt;
+&lt;td&gt;jump if less equal;jump if not greater&lt;/td&gt;
+&lt;td&gt;ZF != OF 或 ZF=1&lt;/td&gt;
+&lt;td&gt;if (si &amp;lt;= sj);&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JNLE/JG&lt;/td&gt;
+&lt;td&gt;若不小于等于则跳转；若大于则跳转&lt;/td&gt;
+&lt;td&gt;jump if not less equaljump if greater&lt;/td&gt;
+&lt;td&gt;SF=0F 且 ZF=0&lt;/td&gt;
+&lt;td&gt;if(si&amp;gt;sj)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3&gt;汇编字符含义&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;BYTE ---- 8
+WORD ---- 16
+DOWRD ---- 32
+QWORD ---- 64
 &lt;/code&gt;&lt;/pre&gt;
 </content:encoded></item><item><title>Draft Example</title><link>https://25pm-sumio.github.io/posts/draft/</link><guid isPermaLink="true">https://25pm-sumio.github.io/posts/draft/</guid><pubDate>Fri, 01 Jul 2022 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;This Article is a Draft&lt;/h1&gt;
 &lt;p&gt;This article is currently in a draft state and is not published. Therefore, it will not be visible to the general audience. The content is still a work in progress and may require further editing and review.&lt;/p&gt;

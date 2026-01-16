@@ -1568,7 +1568,7 @@ d26f353d-c564-48e7-b26f-aa48c6eecd58
 </content:encoded></item><item><title>PWN Note</title><link>https://25pm-sumio.github.io/posts/2026/01/05/01/</link><guid isPermaLink="true">https://25pm-sumio.github.io/posts/2026/01/05/01/</guid><description>PWN学习笔记，自用</description><pubDate>Mon, 05 Jan 2026 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;PWN Note&lt;/h1&gt;
 &lt;h2&gt;环境问题&lt;/h2&gt;
 &lt;h3&gt;UTM安装kali 25.04 x86_64&lt;/h3&gt;
-&lt;p&gt;挂载共享目录&lt;/p&gt;
+&lt;h3&gt;挂载共享目录&lt;/h3&gt;
 &lt;pre&gt;&lt;code&gt;sudo mount -t 9p -o trans=virtio,version=9p2000.u share /mnt/share
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h3&gt;安装pwndbg&lt;/h3&gt;
@@ -1595,6 +1595,10 @@ pyenv global 3.11
 &lt;pre&gt;&lt;code&gt;export PYENV_ROOT=&quot;$HOME/.pyenv&quot;
 [[ -d $PYENV_ROOT/bin ]] &amp;amp;&amp;amp; export PATH=&quot;$PYENV_ROOT/bin:$PATH&quot;
 eval &quot;$(pyenv init - zsh)&quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;/bin/pwntools-gdb&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;#!/bin/sh
+exec /usr/bin/gdb -q -ex init-pwndbg &quot;$@&quot;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;h2&gt;gdb&lt;/h2&gt;
 &lt;h3&gt;gdb配置文件自定义&lt;/h3&gt;
@@ -1842,6 +1846,20 @@ WORD ---- 16
 DOWRD ---- 32
 QWORD ---- 64
 &lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;IDA&lt;/h2&gt;
+&lt;h3&gt;常用快捷键&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;F5								伪代码
+空格							 流程图
+shift + F12				查看所有字符串
+
+
+伪代码场景下 右键Copy to assembly				汇编代码与伪代码结合
+Options -&amp;gt; General -&amp;gt; Disassembly -&amp;gt;  Number of opcode bytes (non-graph) 改为8看obcode(最长16)
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;payload&lt;/h2&gt;
+</content:encoded></item><item><title>轟はじめ - ReGLOSS</title><link>https://25pm-sumio.github.io/posts/2026/01/15/01/</link><guid isPermaLink="true">https://25pm-sumio.github.io/posts/2026/01/15/01/</guid><description>这么帅的番长确定不看一下嘛？</description><pubDate>Fri, 16 Jan 2026 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;『Countach』&lt;/h1&gt;
+&lt;p&gt;&amp;lt;iframe width=&quot;1431&quot; height=&quot;805&quot; src=&quot;https://www.youtube.com/embed/eB2kswPDFaI&quot; title=&quot;【Original】Countach/轟はじめ【Official MV】&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share&quot; referrerpolicy=&quot;strict-origin-when-cross-origin&quot; allowfullscreen&amp;gt;&amp;lt;/iframe&amp;gt;&lt;/p&gt;
 </content:encoded></item><item><title>Draft Example</title><link>https://25pm-sumio.github.io/posts/draft/</link><guid isPermaLink="true">https://25pm-sumio.github.io/posts/draft/</guid><pubDate>Fri, 01 Jul 2022 00:00:00 GMT</pubDate><content:encoded>&lt;h1&gt;This Article is a Draft&lt;/h1&gt;
 &lt;p&gt;This article is currently in a draft state and is not published. Therefore, it will not be visible to the general audience. The content is still a work in progress and may require further editing and review.&lt;/p&gt;
 &lt;p&gt;When the article is ready for publication, you can update the &quot;draft&quot; field to &quot;false&quot; in the Frontmatter:&lt;/p&gt;
